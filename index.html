@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rotina">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0E1A2B">
+<title>Checklist da Rotina</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: uma coluna estreita de etapas tocáveis, com progresso do dia no topo. Visual de quadro de plantão, igual ao infográfico. */
+:root {
+  --bg: #0E1A2B;
+  --surface: #16263C;
+  --line: #26405F;
+  --fg: #F3EFE6;
+  --muted: #A9B8CC;
+  --amber: #F4B942;
+  --teal: #4FD1B5;
+  --on-accent: #0E1A2B;
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #EDF1F6;
+    --surface: #FFFFFF;
+    --line: #CBD5E3;
+    --fg: #0E1A2B;
+    --muted: #4A5B73;
+    --amber: #8F5A00;
+    --teal: #0A7A66;
+    --on-accent: #FFFFFF;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #EDF1F6;
+  --surface: #FFFFFF;
+  --line: #CBD5E3;
+  --fg: #0E1A2B;
+  --muted: #4A5B73;
+  --amber: #8F5A00;
+  --teal: #0A7A66;
+  --on-accent: #FFFFFF;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.4;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 560px; margin: 0 auto; }
+
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+h1 {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1;
+  text-wrap: balance;
+}
+.date { margin: 6px 0 0; color: var(--muted); font-size: 17px; }
+
+.tabs { display: flex; gap: 8px; margin-top: 20px; }
+.tab {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+.tab[aria-selected="true"] { background: var(--surface); border-color: var(--amber); color: var(--fg); }
+.tab:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+
+.progress { margin-top: 20px; }
+.bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; background: var(--teal); border-radius: 5px; transition: width 0.3s ease; }
+.progress-text { margin: 8px 0 0; font-weight: 600; font-size: 16px; }
+
+.steps { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 12px; }
+.step {
+  --k: var(--amber);
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 2px;
+}
+.step.anki { --k: var(--teal); }
+.step.next { border-color: var(--amber); }
+
+.main {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 48px;
+  padding: 14px;
+  margin: 0;
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+.main:focus-visible, .sub-row:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+.box {
+  flex: none;
+  width: 36px; height: 36px;
+  border-radius: 18px;
+  border: 2px solid var(--muted);
+  display: grid; place-items: center;
+  color: transparent;
+  pointer-events: none;
+}
+[aria-checked="true"] > .box { background: var(--k); border-color: var(--k); color: var(--on-accent); }
+
+.txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; pointer-events: none; }
+.timeline { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.time { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.05; color: var(--amber); }
+.pill {
+  background: var(--amber); color: var(--on-accent);
+  font-weight: 600; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 999px;
+}
+.title { font-weight: 600; font-size: 21px; }
+.anki .title { color: var(--teal); }
+.desc { font-size: 17px; }
+.meta { font-size: 15px; color: var(--muted); }
+
+.step.done .time, .step.done .title, .step.done .desc { color: var(--muted); }
+
+.note {
+  margin: 0 14px 12px 64px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 10px;
+  font-size: 15px;
+}
+.subs { list-style: none; margin: 0 14px 10px 64px; padding: 0; }
+.sub-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+.sub-row > span:last-child { pointer-events: none; }
+.sub-row .box { width: 28px; height: 28px; border-radius: 14px; }
+.sub-row .box svg { width: 16px; height: 16px; }
+
+.status { margin: 24px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
+@media (max-width: 380px) { h1 { font-size: 46px; } }
+@media (prefers-reduced-motion: reduce) { .bar > span { transition: none; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Rotina de estudos · Área fiscal</p>
+    <h1 id="routineTitle">Segunda a sexta</h1>
+    <p class="date" id="dateLine"></p>
+    <div class="tabs" role="tablist" aria-label="Escolher a rotina">
+      <button class="tab" role="tab" id="tab-wk" type="button" data-routine="wk">Segunda a sexta</button>
+      <button class="tab" role="tab" id="tab-sab" type="button" data-routine="sab">Sábado</button>
+    </div>
+    <div class="progress">
+      <div class="bar" role="progressbar" aria-label="Etapas feitas hoje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><span id="barFill"></span></div>
+      <p class="progress-text" id="progressText" aria-live="polite"></p>
+    </div>
+  </header>
+  <ol class="steps" id="steps"></ol>
+  <p class="status" id="status">iniciando…</p>
+</main>
+
+<script>
+(function () {
+  var KEY = 'rotina-fiscal-checklist';
+  var CHECK = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  var ROUTINES = {
+    wk: {
+      label: 'Segunda a sexta',
+      steps: [
+        { id: 'anki-manha', time: '04h', title: 'Anki', kind: 'anki',
+          desc: 'Revisar os cards criados ontem', meta: '20 a 30 min' },
+        { id: 'metodo', time: '09h às 11h', title: 'Método IA', kind: 'q',
+          desc: '3 disciplinas, 1 tópico de cada, 20 questões por tópico', meta: 'Cerca de 40 min por disciplina',
+          note: 'Errou? Diga “errei” e o motivo: vai para o caderno de erros.',
+          subs: ['Disciplina 1 · 20 questões', 'Disciplina 2 · 20 questões', 'Disciplina 3 · 20 questões'] },
+        { id: 'tec', time: '14h às 15h', title: 'TEC Concursos', kind: 'q',
+          desc: 'Os mesmos 3 tópicos, 10 questões de cada',
+          note: 'Errou? Também vai para o caderno de erros.',
+          subs: ['Disciplina 1 · 10 questões', 'Disciplina 2 · 10 questões', 'Disciplina 3 · 10 questões'] },
+        { id: 'anki-cards', time: '15h30 às 16h', title: 'Anki', kind: 'anki',
+          desc: 'Caderno de erros vira cards, no projeto do Anki com o prompt', meta: 'Só erros conceituais ou recorrentes' },
+        { id: 'anki-noite', time: 'À noite', title: 'Anki', kind: 'anki',
+          desc: 'Refazer todos os pendentes de todas as disciplinas', meta: 'Cerca de 30 cards por disciplina',
+          subs: ['Disciplina 1 · pendentes', 'Disciplina 2 · pendentes', 'Disciplina 3 · pendentes'] }
+      ],
+      doneText: 'Dia completo. Amanhã começa às 04h.'
+    },
+    sab: {
+      label: 'Sábado',
+      steps: [
+        { id: 'sim-metodo', time: '50 questões', title: 'Simulado do Método IA', kind: 'q',
+          desc: 'Sobre todos os erros da semana' },
+        { id: 'sim-claude', time: '50 questões', title: 'Simulado do Claude', kind: 'q',
+          desc: 'Sobre os erros dos tópicos estudados na semana' },
+        { id: 'caderno', time: 'Depois', title: 'Caderno de erros', kind: 'anki',
+          desc: 'Errou no simulado? Os erros novos vão para o caderno.' }
+      ],
+      doneText: 'Simulados feitos. Bom descanso.'
+    }
+  };
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem(KEY));
+      if (s && s.date === todayKey() && s.checks) return { date: s.date, checks: s.checks };
+    } catch (e) {}
+    return { date: todayKey(), checks: {} };
+  }
+
+  var state = load();
+  var dbDoc = null;
+  var pending = 0;
+  var dirty = false;
+  var current = new Date().getDay() === 6 ? 'sab' : 'wk';
+  var focusSel = null;
+
+  var dbState = 'sem servidor';
+  function setStatus() {
+    var el = document.getElementById('status');
+    if (el) el.textContent = '' + dbState + ' · ' + Object.keys(state.checks).filter(function (k) { return state.checks[k]; }).length + ' marcações';
+  }
+  function saveLocal() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  // Grava no servidor depois de a tela já ter mudado; qualquer falha aqui não afeta o toque.
+  function save() {
+    saveLocal();
+    if (!dbDoc) return;
+    try {
+      pending++;
+      dbDoc.set({ date: state.date, checks: state.checks })
+        .then(function () { dbState = 'salvo no servidor'; }, function () { dbState = 'erro ao salvar no servidor'; })
+        .then(function () { pending = Math.max(0, pending - 1); setStatus(); });
+    } catch (e) {
+      pending = Math.max(0, pending - 1);
+    }
+  }
+  // Lê o servidor uma vez (ao abrir e ao voltar para a página). Se você tocou no meio da leitura, ela é descartada.
+  function pull() {
+    if (!dbDoc) return;
+    // Se você já tocou nesta abertura, o que está na tela vale mais: envia para o servidor em vez de ler.
+    if (dirty) { if (pending === 0) save(); return; }
+    try {
+      dbDoc.get().then(function (snap) {
+        if (dirty || pending > 0) return;
+        var data = snap.exists ? snap.data() : null;
+        var remote = data && data.date === todayKey() && data.checks ? data.checks : null;
+        if (remote) {
+          if (JSON.stringify(remote) !== JSON.stringify(state.checks)) {
+            state.checks = remote;
+            saveLocal();
+            render();
+          }
+        } else if (Object.keys(state.checks).length) {
+          save();
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function ck(r, s, i) { return r + ':' + s.id + (i === undefined ? '' : ':' + i); }
+  function isDone(r, s) {
+    if (s.subs) return s.subs.every(function (_, i) { return !!state.checks[ck(r, s, i)]; });
+    return !!state.checks[ck(r, s)];
+  }
+  function setStep(r, s, val) {
+    if (s.subs) s.subs.forEach(function (_, i) { state.checks[ck(r, s, i)] = val; });
+    else state.checks[ck(r, s)] = val;
+  }
+
+  function render() {
+    var r = ROUTINES[current];
+    var dateText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('routineTitle').textContent = r.label;
+    document.getElementById('dateLine').textContent = dateText.charAt(0).toUpperCase() + dateText.slice(1);
+
+    ['wk', 'sab'].forEach(function (k) {
+      document.getElementById('tab-' + k).setAttribute('aria-selected', k === current ? 'true' : 'false');
+    });
+
+    var doneCount = 0, firstOpen = -1;
+    r.steps.forEach(function (s, idx) {
+      if (isDone(current, s)) doneCount++;
+      else if (firstOpen < 0) firstOpen = idx;
+    });
+
+    var html = '';
+    r.steps.forEach(function (s, idx) {
+      var done = isDone(current, s);
+      var next = idx === firstOpen;
+      html += '<li class="step ' + s.kind + (done ? ' done' : '') + (next ? ' next' : '') + '">';
+      html += '<button type="button" class="main" role="checkbox" aria-checked="' + (done ? 'true' : 'false') + '" data-step="' + s.id + '">';
+      html += '<span class="box">' + CHECK + '</span>';
+      html += '<span class="txt">';
+      html += '<span class="timeline"><span class="time">' + s.time + '</span>' + (next ? '<span class="pill">Próxima</span>' : '') + '</span>';
+      html += '<span class="title">' + s.title + '</span>';
+      html += '<span class="desc">' + s.desc + '</span>';
+      if (s.meta) html += '<span class="meta">' + s.meta + '</span>';
+      html += '</span></button>';
+      if (s.note) html += '<p class="note">' + s.note + '</p>';
+      if (s.subs) {
+        html += '<ul class="subs">';
+        s.subs.forEach(function (label, i) {
+          var on = !!state.checks[ck(current, s, i)];
+          html += '<li><button type="button" class="sub-row" role="checkbox" aria-checked="' + (on ? 'true' : 'false') + '" data-step="' + s.id + '" data-sub="' + i + '">';
+          html += '<span class="box">' + CHECK + '</span><span>' + label + '</span>';
+          html += '</button></li>';
+        });
+        html += '</ul>';
+      }
+      html += '</li>';
+    });
+    document.getElementById('steps').innerHTML = html;
+    setStatus();
+
+    var pct = Math.round((doneCount / r.steps.length) * 100);
+    document.getElementById('barFill').style.width = pct + '%';
+    document.getElementById('bar').setAttribute('aria-valuenow', String(pct));
+    document.getElementById('progressText').textContent =
+      doneCount === r.steps.length ? r.doneText : doneCount + ' de ' + r.steps.length + ' etapas feitas';
+
+    if (focusSel) {
+      var el = document.querySelector(focusSel);
+      if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+    }
+  }
+
+  document.getElementById('steps').addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('button[data-step]') : null;
+    if (!b) return;
+    var r = ROUTINES[current];
+    var id = b.getAttribute('data-step');
+    var step = r.steps.filter(function (s) { return s.id === id; })[0];
+    if (!step) return;
+    var sub = b.getAttribute('data-sub');
+    if (sub !== null) {
+      var k = ck(current, step, Number(sub));
+      state.checks[k] = !state.checks[k];
+    } else {
+      setStep(current, step, !isDone(current, step));
+    }
+    dirty = true;
+    focusSel = 'button[data-step="' + id + '"]' + (sub !== null ? '[data-sub="' + sub + '"]' : ':not([data-sub])');
+    render();
+    save();
+  });
+
+  document.querySelector('.tabs').addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('button[data-routine]') : null;
+    if (!b) return;
+    current = b.getAttribute('data-routine');
+    focusSel = null;
+    render();
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    if (state.date !== todayKey()) {
+      state = { date: todayKey(), checks: {} };
+      current = new Date().getDay() === 6 ? 'sab' : 'wk';
+      focusSel = null;
+      dirty = false;
+      save();
+      render();
+    } else {
+      pull();
+    }
+  });
+
+  render();
+  if (!(window.claude && window.claude.use)) { dbState = 'só neste aparelho'; setStatus(); }
+
+  dbState = 'salvo neste aparelho'; setStatus();
+})();
+</script>
+</body>
+</html>
