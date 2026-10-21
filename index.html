@@ -218,23 +218,22 @@ h1 {
     wk: {
       label: 'Segunda a sexta',
       steps: [
-        { id: 'anki-manha', time: '04h', title: 'Anki', kind: 'anki',
+        { id: 'anki-manha', time: 'Primeira Meta', title: 'Anki', kind: 'anki',
           desc: 'Revisar os cards criados ontem', meta: '20 a 30 min' },
-        { id: 'metodo', time: '09h às 11h', title: 'Método IA', kind: 'q',
+        { id: 'metodo', time: 'Segunda Meta', title: 'Método IA', kind: 'q',
           desc: '3 disciplinas, 1 tópico de cada, 20 questões por tópico', meta: 'Cerca de 40 min por disciplina',
           note: 'Errou? Diga “errei” e o motivo: vai para o caderno de erros.',
           subs: ['Disciplina 1 · 20 questões', 'Disciplina 2 · 20 questões', 'Disciplina 3 · 20 questões'] },
-        { id: 'tec', time: '14h às 15h', title: 'TEC Concursos', kind: 'q',
-          desc: 'Os mesmos 3 tópicos, 10 questões de cada',
+        { id: 'tec', time: 'Terceira Meta', title: 'TEC Concursos', kind: 'q',
+          desc: 'Os mesmos 3 tópicos, 10 questões de cada, cerca de 20 min por disciplina.',
           note: 'Errou? Também vai para o caderno de erros.',
           subs: ['Disciplina 1 · 10 questões', 'Disciplina 2 · 10 questões', 'Disciplina 3 · 10 questões'] },
-        { id: 'anki-cards', time: '15h30 às 16h', title: 'Anki', kind: 'anki',
+        { id: 'anki-cards', time: 'Criar Novos Cards', title: 'Anki', kind: 'anki',
           desc: 'Caderno de erros vira cards, no projeto do Anki com o prompt', meta: 'Só erros conceituais ou recorrentes' },
-        { id: 'anki-noite', time: 'À noite', title: 'Anki', kind: 'anki',
-          desc: 'Refazer todos os pendentes de todas as disciplinas', meta: 'Cerca de 30 cards por disciplina',
-          subs: ['Disciplina 1 · pendentes', 'Disciplina 2 · pendentes', 'Disciplina 3 · pendentes'] }
+        { id: 'anki-noite', time: 'Quarta Meta', title: 'Anki', kind: 'anki',
+          desc: 'Refazer todos os pendentes de todas as disciplinas', meta: 'Cerca de 30 cards por disciplina' }
       ],
-      doneText: 'Dia completo. Amanhã começa às 04h.'
+      doneText: 'Dia completo. Bom descanso.'
     },
     sab: {
       label: 'Sábado',
@@ -243,8 +242,8 @@ h1 {
           desc: 'Sobre todos os erros da semana' },
         { id: 'sim-claude', time: '50 questões', title: 'Simulado do Claude', kind: 'q',
           desc: 'Sobre os erros dos tópicos estudados na semana' },
-        { id: 'caderno', time: 'Depois', title: 'Caderno de erros', kind: 'anki',
-          desc: 'Errou no simulado? Os erros novos vão para o caderno.' }
+        { id: 'caderno', time: 'Revisar', title: 'Revisão Passiva', kind: 'anki',
+          desc: 'Errou no simulado? Volte aos resumos e leia os tópicos somente dos assuntos referentes às questões que errou' }
       ],
       doneText: 'Simulados feitos. Bom descanso.'
     }
