@@ -194,12 +194,8 @@ h1 {
 <main class="wrap">
   <header>
     <p class="eyebrow">Rotina de estudos · Área fiscal</p>
-    <h1 id="routineTitle">Segunda a sexta</h1>
+    <h1 id="routineTitle">Todos os dias</h1>
     <p class="date" id="dateLine"></p>
-    <div class="tabs" role="tablist" aria-label="Escolher a rotina">
-      <button class="tab" role="tab" id="tab-wk" type="button" data-routine="wk">Segunda a sexta</button>
-      <button class="tab" role="tab" id="tab-sab" type="button" data-routine="sab">Sábado</button>
-    </div>
     <div class="progress">
       <div class="bar" role="progressbar" aria-label="Etapas feitas hoje" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><span id="barFill"></span></div>
       <p class="progress-text" id="progressText" aria-live="polite"></p>
@@ -216,32 +212,15 @@ h1 {
 
   var ROUTINES = {
     wk: {
-      label: 'Segunda a sexta',
+      label: 'Todos os dias',
       steps: [
-        { id: 'anki-manha', time: 'Primeira Meta', title: 'Anki', kind: 'anki',
-          desc: 'Revisar os cards criados ontem', meta: '20 a 30 min' },
-        { id: 'metodo', time: 'Segunda Meta', title: 'TEC Concursos e Método IA', kind: 'q',
-          desc: '3 disciplinas, 1 tópico de cada: 20 questões no TEC Concursos e, depois, 10 questões no Método IA',
-          subs: ['1 · TEC Concursos · 20 questões', '2 · TEC Concursos · 20 questões', '3 · TEC Concursos · 20 questões',
-                 '1 · Método IA · 10 questões', '2 · Método IA · 10 questões', '3 · Método IA · 10 questões'] },
+        { id: 'anki-manha', time: 'Primeira Meta', title: 'Anki', kind: 'anki' },
+        { id: 'tec', time: 'Segunda Meta', title: 'TEC Concursos', kind: 'q',
+          subs: ['1 · TEC Concursos (15 minutos)', '2 · TEC Concursos (15 minutos)', '3 · TEC Concursos (15 minutos)'] },
         { id: 'anki-cards', time: 'Criar Novos Cards', title: 'Anki', kind: 'anki',
-          desc: 'Caderno de erros vira cards, no projeto do Anki com o prompt', meta: 'Só erros conceituais ou recorrentes' },
-        { id: 'anki-noite', time: 'Terceira Meta', title: 'Anki', kind: 'anki',
-          desc: 'Refazer todos os pendentes de todas as disciplinas', meta: 'Cerca de 30 cards por disciplina' }
+          desc: 'Elaborar novos flashcards no Claude das questões realizadas hoje' }
       ],
       doneText: 'Dia completo. Bom descanso.'
-    },
-    sab: {
-      label: 'Sábado',
-      steps: [
-        { id: 'sim-metodo', time: '50 questões', title: 'Simulado do Método IA', kind: 'q',
-          desc: 'Sobre todos os erros da semana' },
-        { id: 'sim-claude', time: '50 questões', title: 'Simulado do Claude', kind: 'q',
-          desc: 'Um simulado de 50 questões para cada uma das 3 disciplinas escolhidas do edital atual, com base no caderno de resumo criado.' },
-        { id: 'caderno', time: 'Revisar', title: 'Revisão Passiva', kind: 'anki',
-          desc: 'Errou no simulado? Volte aos resumos e leia os tópicos somente dos assuntos referentes às questões que errou' }
-      ],
-      doneText: 'Simulados feitos. Bom descanso.'
     }
   };
 
@@ -262,7 +241,7 @@ h1 {
   var dbDoc = null;
   var pending = 0;
   var dirty = false;
-  var current = new Date().getDay() === 6 ? 'sab' : 'wk';
+  var current = 'wk';
   var focusSel = null;
 
   var dbState = 'sem servidor';
@@ -325,10 +304,6 @@ h1 {
     document.getElementById('routineTitle').textContent = r.label;
     document.getElementById('dateLine').textContent = dateText.charAt(0).toUpperCase() + dateText.slice(1);
 
-    ['wk', 'sab'].forEach(function (k) {
-      document.getElementById('tab-' + k).setAttribute('aria-selected', k === current ? 'true' : 'false');
-    });
-
     var doneCount = 0, firstOpen = -1;
     r.steps.forEach(function (s, idx) {
       if (isDone(current, s)) doneCount++;
@@ -345,7 +320,7 @@ h1 {
       html += '<span class="txt">';
       html += '<span class="timeline"><span class="time">' + s.time + '</span>' + (next ? '<span class="pill">Próxima</span>' : '') + '</span>';
       html += '<span class="title">' + s.title + '</span>';
-      html += '<span class="desc">' + s.desc + '</span>';
+      if (s.desc) html += '<span class="desc">' + s.desc + '</span>';
       if (s.meta) html += '<span class="meta">' + s.meta + '</span>';
       html += '</span></button>';
       if (s.note) html += '<p class="note">' + s.note + '</p>';
@@ -396,19 +371,11 @@ h1 {
     save();
   });
 
-  document.querySelector('.tabs').addEventListener('click', function (e) {
-    var b = e.target && e.target.closest ? e.target.closest('button[data-routine]') : null;
-    if (!b) return;
-    current = b.getAttribute('data-routine');
-    focusSel = null;
-    render();
-  });
-
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState !== 'visible') return;
     if (state.date !== todayKey()) {
       state = { date: todayKey(), checks: {} };
-      current = new Date().getDay() === 6 ? 'sab' : 'wk';
+      current = 'wk';
       focusSel = null;
       dirty = false;
       save();
